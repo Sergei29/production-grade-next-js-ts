@@ -51,9 +51,8 @@ BlogPost.defaultProps = {
 }
 
 /**
- * @description Need to get the paths here
- * then the the correct post for the matching path
- * Posts can come from the fs or our CMS
+ * @description Any static side generaton and if you have a dynamic routes - you need to provide all those routes list to generate at build time.
+ * So, we need to get the paths here then the the correct post for the matching path Posts can come from the fs or our CMS
  */
 export const getStaticPaths: GetStaticPaths = async (context) => {
   // read all file names in directory: `posts/`
@@ -67,19 +66,32 @@ export const getStaticPaths: GetStaticPaths = async (context) => {
     return data
   })
 
+  /**
+   * @description `fallback: true` - will allow us to still attampt to render the page that wasn't previouly rendered at build time, ig `getStaticProps` doesn't error out.
+   */
   return {
     paths: slugs.map((s) => ({ params: { slug: s.slug } })),
     fallback: true,
   }
 }
 
-export const getStaticProps: GetStaticProps = async ({ params }: GetServerSidePropsContext<{ slug: string }>) => {
+type CtxType = GetServerSidePropsContext<{ slug: string }>
+
+/*
+ * @description `getStaticProps` - gets us the data that matches these paths at the runtime, however the paths themselves were provided by `getStaticPaths` at build time;
+ * @param {Object} context context object
+ * @returns {Object} component static props
+ */
+export const getStaticProps: GetStaticProps = async (context: CtxType) => {
+  const { params } = context
   let post: string
 
   try {
+    // 1st: we try to find the content data in the file system
     const pathToFile = path.join(process.cwd(), 'posts', `${params.slug}.mdx`)
     post = fs.readFileSync(pathToFile, 'utf-8')
   } catch (error) {
+    // 2nd: if there is no content in file system, then we get the content from imported file ( as a backup ). in rael scenario it will be probably an error handling.
     const cmsPosts = postsFromCMS.published.map((post) => matter(post))
     const match = cmsPosts.find((p) => p.data.slug === params.slug)
     post = match.content
