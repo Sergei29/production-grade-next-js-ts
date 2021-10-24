@@ -48,7 +48,7 @@ export default Blog
  * fs and our CMS
  */
 export const getStaticProps: GetStaticProps = async (context) => {
-  const cmsPosts = postsFromCMS.published.map((strContent) => {
+  const cmsPosts = (context.preview ? postsFromCMS.draft : postsFromCMS.published).map((strContent) => {
     const { data } = matter(strContent)
     return data
   })

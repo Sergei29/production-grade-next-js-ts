@@ -83,7 +83,7 @@ type CtxType = GetServerSidePropsContext<{ slug: string }>
  * @returns {Object} component static props
  */
 export const getStaticProps: GetStaticProps = async (context: CtxType) => {
-  const { params } = context
+  const { params, preview } = context
   let post: string
 
   try {
@@ -92,7 +92,7 @@ export const getStaticProps: GetStaticProps = async (context: CtxType) => {
     post = fs.readFileSync(pathToFile, 'utf-8')
   } catch (error) {
     // 2nd: if there is no content in file system, then we get the content from imported file ( as a backup ). in rael scenario it will be probably an error handling.
-    const cmsPosts = postsFromCMS.published.map((post) => matter(post))
+    const cmsPosts = (preview ? postsFromCMS.draft : postsFromCMS.published).map((post) => matter(post))
     const match = cmsPosts.find((p) => p.data.slug === params.slug)
     post = match.content
   }

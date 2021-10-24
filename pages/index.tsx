@@ -57,7 +57,7 @@ Home.defaultProps = {
 export const getStaticProps: GetStaticProps = async (context) => {
   return {
     props: {
-      content: home.published,
+      content: context.preview ? home.draft : home.published,
     },
   }
 }
