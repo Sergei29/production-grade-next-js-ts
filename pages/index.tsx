@@ -1,11 +1,20 @@
 import React, { FC } from 'react'
+import { GetStaticProps } from 'next'
 import { Pane, majorScale } from 'evergreen-ui'
 import Container from '../components/container'
 import Hero from '../components/hero'
 import HomeNav from '../components/homeNav'
 import FeatureSection from '../components/featureSection'
+import { home } from '../content'
 
-const Home: FC<{ content: { hero: any; features: any[] } }> = ({ content }) => {
+type Props = { content: { hero: any; features: any[] } }
+
+/**
+ *@description landing page
+ * @param {Object} props component props
+ * @returns {JSX} landing page content
+ */
+const Home: FC<Props> = ({ content }) => {
   return (
     <Pane>
       <header>
@@ -43,6 +52,14 @@ Home.defaultProps = {
     features: [{ title: 'default feature', body: 'default body' }],
     hero: { title: 'default title', body: 'default body' },
   },
+}
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  return {
+    props: {
+      content: home.published,
+    },
+  }
 }
 
 export default Home
