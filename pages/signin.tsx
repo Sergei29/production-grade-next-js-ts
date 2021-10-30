@@ -35,9 +35,12 @@ const Signin = (): JSX.Element => {
   const router = useRouter()
   const [session, loading] = useSession()
 
+  const handleSignIn = () => {
+    signIn('github')
+  }
+
   useEffect(() => {
-    if (!!session) {
-      console.log('session :>> ', session)
+    if (!loading && session) {
       router.push('/app')
     }
   }, [session, router])
@@ -56,7 +59,7 @@ const Signin = (): JSX.Element => {
       </Pane>
       <Pane {...objPaneButtonsStyle}>
         <Pane width="100%" textAlign="center">
-          <SocialButton type="github" onClick={() => signIn('github')} />
+          <SocialButton type="github" onClick={handleSignIn} />
         </Pane>
       </Pane>
     </Pane>

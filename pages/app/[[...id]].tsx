@@ -1,5 +1,7 @@
 import React, { FC, useState } from 'react'
 import { Pane, Dialog, majorScale } from 'evergreen-ui'
+import { GetServerSideProps } from 'next'
+import { getSession, useSession } from 'next-auth/client'
 import { useRouter } from 'next/router'
 import Logo from '../../components/logo'
 import FolderList from '../../components/folderList'
@@ -17,10 +19,13 @@ type Props = {
   activeDocs?: Record<string, any>[]
 }
 
-const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
+const App: FC<Props> = ({ folders, activeDoc = {}, activeFolder = {}, activeDocs = [] }) => {
   const router = useRouter()
   const [newFolderIsShown, setIsShown] = useState(false)
-  const user: null | UserSession = null
+  const [session, loading] = useSession()
+  if (loading) {
+    return null
+  }
 
   const Page = () => {
     if (activeDoc) {
@@ -34,7 +39,7 @@ const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
     return null
   }
 
-  if (false) {
+  if (!loading && !session) {
     return (
       <Dialog
         isShown
@@ -60,11 +65,11 @@ const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
           <NewFolderButton onClick={() => setIsShown(true)} />
         </Pane>
         <Pane>
-          <FolderList folders={folders} />{' '}
+          <FolderList folders={folders} />
         </Pane>
       </Pane>
       <Pane marginLeft={300} width="calc(100vw - 300px)" height="100vh" overflowY="auto" position="relative">
-        {!!user && <User user={user} />}
+        {session.user && <User user={session.user as UserSession} />}
         <Page />
       </Pane>
       <NewFolderDialog close={() => setIsShown(false)} isShown={newFolderIsShown} onNewFolder={() => {}} />
@@ -73,7 +78,21 @@ const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
 }
 
 App.defaultProps = {
-  folders: [],
+  folders: [{ _id: 1, name: 'hello' }],
+}
+
+/**
+ * @description Now that we have users and jwts, we can lock down access to our app at `./pages/app/[[...id]].tsx`. This is an optional catch all route which means its inclusive an also matches `/app`. A user should be signed in to access this route, lets make it so
+ */
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getSession(context)
+  console.log('hit')
+
+  return {
+    props: {
+      session,
+    },
+  }
 }
 
 /**
