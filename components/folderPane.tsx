@@ -5,7 +5,9 @@ import { getRandomGradientCss } from '../utils/gradients'
 import NewFolderButton from './newFolderButton'
 import NewDocDialog from './newDocumentDialog'
 
-const FolderPane: FC<{ folder: any; docs: any[] }> = ({ folder, docs }) => {
+type Props = { folder: Record<string, any>; docs: Record<string, any>[] }
+
+const FolderPane: FC<Props> = ({ folder, docs }) => {
   const { bg, image } = getRandomGradientCss()
   const [isShown, setIsShown] = useState(false)
   const [allDocs, setDocs] = useState(docs || [])

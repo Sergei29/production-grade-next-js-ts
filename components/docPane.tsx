@@ -6,7 +6,9 @@ import { getRandomGradientCss } from '../utils/gradients'
 
 const Editor = dynamic(() => import('./editor'), { ssr: false })
 
-const DocPane: FC<{ folder: any; doc: any }> = ({ folder, doc }) => {
+type Props = { folder: Record<string, any>; doc: Record<string, any> }
+
+const DocPane: FC<Props> = ({ folder, doc }) => {
   const { bg, image } = getRandomGradientCss()
 
   return (

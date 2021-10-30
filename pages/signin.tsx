@@ -1,23 +1,50 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Pane, majorScale, Text } from 'evergreen-ui'
+import { useSession, signIn } from 'next-auth/client'
+import { useRouter } from 'next/router'
 import Logo from '../components/logo'
-
 import SocialButton from '../components/socialButton'
 
-const Signin = () => {
+const objPaneTitleStyle = {
+  height: '100%',
+  width: '50%',
+  borderRight: true,
+  paddingX: majorScale(8),
+  paddingY: majorScale(5),
+  background: '#47B881',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}
+
+const objPaneButtonsStyle = {
+  height: '100%',
+  width: '50%',
+  background: 'tint2',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingX: majorScale(7),
+}
+
+/**
+ * @description sign in page
+ * @returns {JSX}
+ */
+const Signin = (): JSX.Element => {
+  const router = useRouter()
+  const [session, loading] = useSession()
+
+  useEffect(() => {
+    if (!!session) {
+      console.log('session :>> ', session)
+      router.push('/app')
+    }
+  }, [session, router])
+
   return (
     <Pane height="100vh" width="100vw" display="flex">
-      <Pane
-        height="100%"
-        width="50%"
-        borderRight
-        paddingX={majorScale(8)}
-        paddingY={majorScale(5)}
-        background="#47B881"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
+      <Pane {...objPaneTitleStyle}>
         <Pane>
           <Logo color="white" fontSize="60px" />
           <Pane marginTop={majorScale(2)}>
@@ -27,17 +54,9 @@ const Signin = () => {
           </Pane>
         </Pane>
       </Pane>
-      <Pane
-        height="100%"
-        width="50%"
-        background="tint2"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        paddingX={majorScale(7)}
-      >
+      <Pane {...objPaneButtonsStyle}>
         <Pane width="100%" textAlign="center">
-          <SocialButton type="github" onClick={() => {}} />
+          <SocialButton type="github" onClick={() => signIn('github')} />
         </Pane>
       </Pane>
     </Pane>
