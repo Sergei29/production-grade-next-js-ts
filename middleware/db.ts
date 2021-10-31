@@ -1,4 +1,5 @@
 import { connectToDB } from '../db/connect'
+import { NextApiRequest, NextApiResponse } from 'next'
 
 declare global {
   namespace NodeJS {
@@ -8,10 +9,21 @@ declare global {
   }
 }
 
-export default async function database(req, res, next) {
+type Request = NextApiRequest & Record<string, any>
+
+/**
+ * @description middleware attaching the connected DB to request object
+ * @param {Object} req request
+ * @param {Object} res response
+ * @param {Function} next fall through to next route handler
+ * @returns {Promise<undefined>}
+ */
+const database = async (req: Request, res: NextApiResponse, next) => {
   const { db, dbClient } = await connectToDB()
   req.db = db
   req.dbClinet = dbClient
 
   next()
 }
+
+export default database

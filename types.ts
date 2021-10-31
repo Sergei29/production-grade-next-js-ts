@@ -1,6 +1,11 @@
 import { Db, MongoClient } from 'mongodb'
 import { NextApiRequest, NextApiResponse } from 'next'
 
+export enum Collection {
+  FOLDERS = 'folders',
+  DOCS = 'docs',
+  USERS = 'users',
+}
 export interface PostFrontMatter {
   title: string
   summary: string

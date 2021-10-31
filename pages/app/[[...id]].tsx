@@ -2,6 +2,7 @@ import React, { FC, useState } from 'react'
 import { Pane, Dialog, majorScale } from 'evergreen-ui'
 import { GetServerSideProps } from 'next'
 import { getSession, useSession } from 'next-auth/client'
+import { Session } from 'next-auth'
 import { useRouter } from 'next/router'
 import Logo from '../../components/logo'
 import FolderList from '../../components/folderList'
@@ -10,7 +11,10 @@ import User from '../../components/user'
 import FolderPane from '../../components/folderPane'
 import DocPane from '../../components/docPane'
 import NewFolderDialog from '../../components/newFolderDialog'
+import { folder, doc, connectToDB } from '../../db'
 import { UserSession } from '../../types'
+
+const arrDefaultFolders = [{ _id: '1', name: 'hello' }]
 
 type Props = {
   folders?: Record<string, any>[]
@@ -78,22 +82,14 @@ const App: FC<Props> = ({ folders, activeDoc = {}, activeFolder = {}, activeDocs
 }
 
 App.defaultProps = {
-  folders: [{ _id: 1, name: 'hello' }],
+  folders: arrDefaultFolders,
 }
 
 /**
  * @description Now that we have users and jwts, we can lock down access to our app at `./pages/app/[[...id]].tsx`. This is an optional catch all route which means its inclusive an also matches `/app`. A user should be signed in to access this route, lets make it so
+ * if `/app/1` => context.params.id=[1] or context.params.id=1
+ * if `/app/1/2` => context.params.id=[1, 2]
  */
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getSession(context)
-  console.log('hit')
-
-  return {
-    props: {
-      session,
-    },
-  }
-}
 
 /**
  * Catch all handler. Must handle all different page
@@ -102,8 +98,39 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
  * 2. Folders => Folder selected
  * 3. Folders => Folder selected => Document selected
  *
- * An unauth user should not be able to access this page.
+ * An unauthorized user should not be able to access this page.
  *
  * @param context
  */
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session: Session | Record<string, any> = await getSession(context)
+  if (!session) {
+    return {
+      props: {
+        session,
+      },
+    }
+  }
+
+  const { db } = await connectToDB()
+  const folders = await folder.getFolders(db, session.user.id)
+  const props: Record<string, any> = { session, folders: folders.length > 0 ? folders : arrDefaultFolders }
+
+  if (context.params.id) {
+    // if so => means we are in state 2, folder is selected
+    props.activeFolder = props.folders.find(({ _id }) => _id === context.params.id[0])
+
+    props.activeDocs = await doc.getDocsByFolder(db, props.activeFolder._id)
+  }
+
+  if (!!context.params.id && context.params.id.length > 1) {
+    // if so => means we are in state 3, folder is selected and folder's doc is also selected
+    props.activeDoc = props.activeDocs.find((objDoc) => objDoc._id === context.params.id[1])
+  }
+
+  return {
+    props,
+  }
+}
+
 export default App
