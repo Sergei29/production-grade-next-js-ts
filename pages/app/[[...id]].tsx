@@ -14,8 +14,6 @@ import NewFolderDialog from '../../components/newFolderDialog'
 import { folder, doc, connectToDB } from '../../db'
 import { UserSession } from '../../types'
 
-const arrDefaultFolders = [{ _id: '1', name: 'hello' }]
-
 type Props = {
   folders?: Record<string, any>[]
   activeFolder?: Record<string, any>
@@ -23,7 +21,7 @@ type Props = {
   activeDocs?: Record<string, any>[]
 }
 
-const App: FC<Props> = ({ folders, activeDoc = {}, activeFolder = {}, activeDocs = [] }) => {
+const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
   const router = useRouter()
   const [newFolderIsShown, setIsShown] = useState(false)
   const [session, loading] = useSession()
@@ -82,7 +80,7 @@ const App: FC<Props> = ({ folders, activeDoc = {}, activeFolder = {}, activeDocs
 }
 
 App.defaultProps = {
-  folders: arrDefaultFolders,
+  folders: [{ _id: '1', name: 'hello' }],
 }
 
 /**
@@ -114,18 +112,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const { db } = await connectToDB()
   const folders = await folder.getFolders(db, session.user.id)
-  const props: Record<string, any> = { session, folders: folders.length > 0 ? folders : arrDefaultFolders }
+  const props: Record<string, any> = { session, folders }
 
   if (context.params.id) {
     // if so => means we are in state 2, folder is selected
     props.activeFolder = props.folders.find(({ _id }) => _id === context.params.id[0])
 
     props.activeDocs = await doc.getDocsByFolder(db, props.activeFolder._id)
-  }
 
-  if (!!context.params.id && context.params.id.length > 1) {
-    // if so => means we are in state 3, folder is selected and folder's doc is also selected
-    props.activeDoc = props.activeDocs.find((objDoc) => objDoc._id === context.params.id[1])
+    const activeDocId = context.params.id[1]
+    if (activeDocId) {
+      // if so => means we are in state 3, folder is selected and folder's doc is also selected
+      props.activeDoc = props.activeDocs.find((objDoc) => objDoc._id === activeDocId)
+    }
   }
 
   return {

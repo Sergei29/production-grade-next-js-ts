@@ -46,7 +46,9 @@ const EDITOR_JS_TOOLS = {
   simpleImage: SimpleImage,
 }
 
-const Editor: FC<{ docId: string; content: any }> = ({ content, docId }) => {
+type Props = { docId: string; content: any }
+
+const Editor: FC<Props> = ({ content, docId }) => {
   const editor = useRef(null)
   const [saving, setSaving] = useState(false)
   const [doneSaving, setDoneSaving] = useState(false)
