@@ -33,7 +33,7 @@ const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
    * @returns {Promise<undefined>} makes api call, returns promise resolving to void
    */
   const handleNewFolder = async (name: string) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_HOST}/api/folder`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/folder`, {
       method: 'POST',
       body: JSON.stringify({ name }),
       headers: {
