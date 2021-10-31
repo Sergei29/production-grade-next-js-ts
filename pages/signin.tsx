@@ -41,10 +41,9 @@ const Signin = (): JSX.Element => {
 
   useEffect(() => {
     if (!loading && session) {
-      alert('logged in!')
       router.push('/app')
     }
-  }, [session, router])
+  }, [session, router, loading])
 
   return (
     <Pane height="100vh" width="100vw" display="flex">
