@@ -25,8 +25,25 @@ const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
   const router = useRouter()
   const [newFolderIsShown, setIsShown] = useState(false)
   const [session, loading] = useSession()
-  if (loading) {
-    return null
+  const [allFolders, setAllFolders] = useState<Record<string, any>[]>(folders || [])
+
+  /**
+   * @description add new folder handler ( client-side mutations)
+   * @param {String} name new folder name
+   * @returns {Promise<undefined>} makes api call, returns promise resolving to void
+   */
+  const handleNewFolder = async (name: string) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_HOST}/api/folder`, {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const { data } = await res.json()
+
+    setAllFolders((prevState) => [...prevState, data])
   }
 
   const Page = () => {
@@ -40,6 +57,8 @@ const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
 
     return null
   }
+
+  if (loading) return null
 
   if (!loading && !session) {
     return (
@@ -67,14 +86,14 @@ const App: FC<Props> = ({ folders, activeDoc, activeFolder, activeDocs }) => {
           <NewFolderButton onClick={() => setIsShown(true)} />
         </Pane>
         <Pane>
-          <FolderList folders={folders} />
+          <FolderList folders={allFolders} />
         </Pane>
       </Pane>
       <Pane marginLeft={300} width="calc(100vw - 300px)" height="100vh" overflowY="auto" position="relative">
         {session.user && <User user={session.user as UserSession} />}
         <Page />
       </Pane>
-      <NewFolderDialog close={() => setIsShown(false)} isShown={newFolderIsShown} onNewFolder={() => {}} />
+      <NewFolderDialog close={() => setIsShown(false)} isShown={newFolderIsShown} onNewFolder={handleNewFolder} />
     </Pane>
   )
 }

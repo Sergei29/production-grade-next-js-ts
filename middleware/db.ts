@@ -21,7 +21,7 @@ type Request = NextApiRequest & Record<string, any>
 const database = async (req: Request, res: NextApiResponse, next) => {
   const { db, dbClient } = await connectToDB()
   req.db = db
-  req.dbClinet = dbClient
+  req.dbClient = dbClient
 
   next()
 }
