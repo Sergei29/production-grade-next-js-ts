@@ -40,10 +40,10 @@ const Signin = (): JSX.Element => {
   }
 
   useEffect(() => {
-    if (!loading && session) {
+    if (session) {
       router.push('/app')
     }
-  }, [session, router, loading])
+  }, [session, router])
 
   return (
     <Pane height="100vh" width="100vw" display="flex">
